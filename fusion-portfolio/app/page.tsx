@@ -89,7 +89,7 @@ const PROJECTS: Array<{
     tech: ["HTML", "CSS", "JavaScript"],
     href: "",
     repo: "https://github.com/Riaan-debug/First-Portfolio",
-    image: "/logos/portfolio.svg",
+    image: "/images/riaan-van-rhyn-portfolio-screenshot.png",
   },
   {
     name: "Fitness Gear Web Store",
@@ -108,16 +108,17 @@ const PROJECTS: Array<{
   {
     name: "Vibez - iTunes Search App",
     description:
-      "Full-stack iTunes Search Capstone Project built with modern web technologies, featuring a client-server architecture and API integration.",
+      "A modern music search application built with TypeScript and vanilla web technologies. Features iTunes API integration, search functionality, and a favorites system with a sleek dark theme UI.",
     outcomes: [
       "Full-stack development with client-server architecture",
       "TypeScript implementation for type safety",
       "API integration and data management",
+      "Modern dark theme UI with responsive design",
     ],
     tech: ["TypeScript", "CSS", "JavaScript", "HTML"],
     href: "",
     repo: "https://github.com/Riaan-debug/vibez-capstone",
-    image: "/logos/hyperiondev.svg",
+    image: "/images/vibez-app-screenshot.png",
   },
 ];
 
