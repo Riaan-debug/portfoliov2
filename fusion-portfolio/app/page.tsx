@@ -9,8 +9,6 @@ import {
   Github,
   Linkedin,
   Mail,
-  Moon,
-  Sun,
   Zap,
   Gauge,
   Star,
@@ -168,41 +166,83 @@ function useReducedMotion() {
 
 // ====== COMPONENTS ==========================================================
 const Section: React.FC<{ id?: string; title: string; icon?: React.ReactNode; className?: string; children: React.ReactNode }> = ({ id, title, icon, className, children }) => (
-  <section id={id} className={classNames("max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14", className)}>
-    <div className="flex items-center gap-3 mb-8">
-      <div className="p-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 border border-zinc-200/60 dark:border-zinc-700/60">
+  <motion.section 
+    id={id} 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.1 }}
+    transition={{ duration: 0.6 }}
+    className={classNames("max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14", className)}
+  >
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="flex items-center gap-3 mb-8"
+    >
+      <motion.div 
+        whileHover={{ 
+          scale: 1.1,
+          rotate: 5,
+          transition: { duration: 0.2 }
+        }}
+        className="p-2 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-700 border border-zinc-700/60"
+      >
         {icon}
-      </div>
+      </motion.div>
       <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{title}</h2>
-    </div>
+    </motion.div>
     {children}
-  </section>
+  </motion.section>
 );
 
 const Pill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border border-zinc-200 dark:border-zinc-700 bg-white/70 dark:bg-zinc-900/50 backdrop-blur">
+  <motion.span 
+    whileHover={{ 
+      scale: 1.05,
+      y: -1,
+      transition: { duration: 0.2 }
+    }}
+    className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium border border-zinc-700 bg-zinc-900/50 backdrop-blur hover:bg-zinc-800 cursor-pointer transition-colors"
+  >
     {children}
-  </span>
+  </motion.span>
 );
 
-const Metric: React.FC<{ label: string; value: string }>
-= ({ label, value }) => (
-  <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 bg-white/60 dark:bg-zinc-900/40">
+const Metric: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <motion.div 
+    whileHover={{ 
+      scale: 1.05,
+      y: -2,
+      transition: { duration: 0.2 }
+    }}
+    className="rounded-2xl border border-zinc-800 p-4 bg-zinc-900/40 hover:bg-zinc-900/60 cursor-pointer transition-colors"
+  >
     <div className="text-2xl font-semibold">{value}</div>
     <div className="text-xs opacity-70">{label}</div>
-  </div>
+  </motion.div>
 );
 
 const ProjectCard: React.FC<{ p: (typeof PROJECTS)[number] }>
 = ({ p }) => (
   <motion.article
-    initial={{ opacity: 0, y: 8 }}
-    whileInView={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    whileInView={{ opacity: 1, y: 0, scale: 1 }}
     viewport={{ once: true, amount: 0.2 }}
-    transition={{ duration: 0.4 }}
-    className="group grid grid-cols-1 md:grid-cols-5 gap-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-4 hover:shadow-md bg-white/70 dark:bg-zinc-900/40"
+    whileHover={{ 
+      y: -4, 
+      scale: 1.02,
+      transition: { duration: 0.2 }
+    }}
+    transition={{ 
+      duration: 0.5,
+      type: "spring",
+      stiffness: 100
+    }}
+    className="group grid grid-cols-1 md:grid-cols-5 gap-4 rounded-2xl border border-zinc-800 p-4 hover:shadow-lg bg-zinc-900/40 transition-all duration-300"
   >
-    <div className="md:col-span-2 rounded-xl overflow-hidden border border-zinc-200/60 dark:border-zinc-700/60 bg-zinc-100 dark:bg-zinc-800 aspect-video">
+    <div className="md:col-span-2 rounded-xl overflow-hidden border border-zinc-700/60 bg-zinc-800 aspect-video">
       {p.image ? (
         <img loading="lazy" src={p.image} alt={p.name} className="w-full h-full object-cover" />
       ) : (
@@ -214,12 +254,12 @@ const ProjectCard: React.FC<{ p: (typeof PROJECTS)[number] }>
         <h3 className="text-lg font-semibold tracking-tight">{p.name}</h3>
         <div className="flex gap-2">
           {p.href && (
-            <a aria-label="Live demo" href={p.href} target="_blank" rel="noreferrer" className="p-2 rounded-lg border hover:bg-zinc-50 dark:hover:bg-zinc-800">
+            <a aria-label="Live demo" href={p.href} target="_blank" rel="noreferrer" className="p-2 rounded-lg border hover:bg-zinc-800">
               <ExternalLink className="w-4 h-4" />
             </a>
           )}
           {p.repo && (
-            <a aria-label="Repository" href={p.repo} target="_blank" rel="noreferrer" className="p-2 rounded-lg border hover:bg-zinc-50 dark:hover:bg-zinc-800">
+            <a aria-label="Repository" href={p.repo} target="_blank" rel="noreferrer" className="p-2 rounded-lg border hover:bg-zinc-800">
               <Github className="w-4 h-4" />
             </a>
           )}
@@ -242,17 +282,15 @@ const ProjectCard: React.FC<{ p: (typeof PROJECTS)[number] }>
 
 // ====== MAIN COMPONENT ======================================================
 export default function PortfolioFusion() {
-  const [dark, setDark] = useState<boolean | null>(null);
   const [mounted, setMounted] = useState(false);
-  const reducedMotion = useReducedMotion();
 
   // Move useMemo before any conditional returns to follow Rules of Hooks
   const heroVariants = useMemo(
     () => ({
-      hidden: { opacity: 0, y: reducedMotion ? 0 : 10 },
+      hidden: { opacity: 0, y: 10 },
       show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     }),
-    [reducedMotion]
+    []
   );
 
   // Prevent hydration mismatch
@@ -260,52 +298,88 @@ export default function PortfolioFusion() {
     setMounted(true);
   }, []);
 
-  // initial theme - only run on client
-  useEffect(() => {
-    if (!mounted) return;
-    const preferredDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDark(preferredDark);
-  }, [mounted]);
-
-  useEffect(() => {
-    if (dark === null || !mounted) return;
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark, mounted]);
-
-  // Don't render theme-dependent content until mounted
+  // Don't render until mounted
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 text-zinc-900">
+      <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900 text-zinc-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
-          <div className="animate-pulse">
-            <div className="h-8 bg-zinc-200 rounded w-48 mb-4"></div>
-            <div className="h-4 bg-zinc-200 rounded w-32 mb-2"></div>
-            <div className="h-4 bg-zinc-200 rounded w-64"></div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {/* Header skeleton */}
+            <div className="flex items-center justify-between">
+              <div className="h-8 bg-zinc-800 rounded w-48 animate-pulse"></div>
+              <div className="h-8 bg-zinc-800 rounded w-32 animate-pulse"></div>
+            </div>
+            
+            {/* Hero skeleton */}
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="h-12 bg-zinc-800 rounded w-3/4 animate-pulse"></div>
+                <div className="h-6 bg-zinc-800 rounded w-1/2 animate-pulse"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-zinc-800 rounded w-full animate-pulse"></div>
+                  <div className="h-4 bg-zinc-800 rounded w-5/6 animate-pulse"></div>
+                  <div className="h-4 bg-zinc-800 rounded w-4/6 animate-pulse"></div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="h-10 bg-zinc-800 rounded w-24 animate-pulse"></div>
+                  <div className="h-10 bg-zinc-800 rounded w-24 animate-pulse"></div>
+                </div>
+              </div>
+              <div className="h-64 bg-zinc-800 rounded-xl animate-pulse"></div>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900 text-zinc-900 dark:text-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900 text-zinc-50">
       {/* NAV */}
-      <header className="sticky top-0 z-40 backdrop-blur border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/60 dark:bg-zinc-950/40">
+      <header className="sticky top-0 z-40 backdrop-blur border-b border-zinc-800/60 bg-zinc-950/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <a href="#home" className="font-semibold tracking-tight">{ME.name}</a>
+          <motion.a 
+            href="#home" 
+            className="font-semibold tracking-tight cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            {ME.name}
+          </motion.a>
           <nav className="hidden sm:flex items-center gap-6 text-sm">
-            <a href="#projects" className="hover:underline">Projects</a>
-            <a href="#skills" className="hover:underline">Tech Stack</a>
-            <a href="#principles" className="hover:underline">Principles</a>
-            <a href="#contact" className="hover:underline">Contact</a>
+            {[
+              { href: "#projects", label: "Projects" },
+              { href: "#skills", label: "Tech Stack" },
+              { href: "#principles", label: "Principles" },
+              { href: "#contact", label: "Contact" }
+            ].map((link) => (
+              <motion.a
+                key={link.href}
+                href={link.href}
+                className="relative cursor-pointer"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+              >
+                {link.label}
+                <motion.div
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-zinc-100"
+                  initial={{ scaleX: 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.a>
+            ))}
           </nav>
           <div className="flex items-center gap-2">
-            <a href={ME.pdf} className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800 text-sm" download>
+            <a href={ME.pdf} className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border hover:bg-zinc-800 text-sm" download>
               <Download className="w-4 h-4" /> <span>Download PDF</span>
             </a>
-            <button aria-label="Toggle theme" className="p-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800" onClick={() => setDark((d) => !d)}>
-              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+
           </div>
         </div>
       </header>
@@ -320,7 +394,7 @@ export default function PortfolioFusion() {
       >
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+            <div className="inline-flex items-center gap-2 text-xs text-zinc-400">
               <span className="inline-flex h-2 w-2 rounded-full bg-green-500" aria-hidden />
               Available for freelance & roles
             </div>
@@ -332,33 +406,74 @@ export default function PortfolioFusion() {
               {ME.blurb}
             </p>
             <div className="flex flex-wrap gap-3 mt-6">
-              <a href={ME.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                <Github className="w-4 h-4"/> GitHub
-              </a>
-              <a href={ME.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                <Linkedin className="w-4 h-4"/> LinkedIn
-              </a>
-              <a href={`mailto:${ME.email}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                <Mail className="w-4 h-4"/> Email me
-              </a>
-            </div>
-            <div className="grid grid-cols-3 gap-3 mt-6">
-              {ME.metrics.map((m) => (
-                <Metric key={m.label} label={m.label} value={m.value} />
+              {[
+                { href: ME.github, icon: <Github className="w-4 h-4" />, label: "GitHub" },
+                { href: ME.linkedin, icon: <Linkedin className="w-4 h-4" />, label: "LinkedIn" },
+                { href: `mailto:${ME.email}`, icon: <Mail className="w-4 h-4" />, label: "Email me" }
+              ].map((button, index) => (
+                <motion.a
+                  key={button.label}
+                  href={button.href}
+                  target={button.label !== "Email me" ? "_blank" : undefined}
+                  rel={button.label !== "Email me" ? "noreferrer" : undefined}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-800 cursor-pointer"
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: 0.3 + index * 0.1,
+                    type: "spring",
+                    stiffness: 100
+                  }}
+                >
+                  {button.icon} {button.label}
+                </motion.a>
               ))}
             </div>
+            <motion.div 
+              className="grid grid-cols-3 gap-3 mt-6"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
+            >
+              {ME.metrics.map((m, index) => (
+                <motion.div
+                  key={m.label}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.8 },
+                    visible: { opacity: 1, scale: 1 }
+                  }}
+                  transition={{ duration: 0.4, type: "spring", stiffness: 100 }}
+                >
+                  <Metric label={m.label} value={m.value} />
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
           {/* QR / Preview */}
           <div className="relative">
-            <div className="absolute -inset-4 -z-10 bg-gradient-to-tr from-fuchsia-300/30 to-sky-300/30 dark:from-fuchsia-500/10 dark:to-sky-500/10 rounded-3xl blur-2xl" aria-hidden />
-            <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 p-6 bg-white/70 dark:bg-zinc-900/40">
+            <div className="absolute -inset-4 -z-10 bg-gradient-to-tr from-fuchsia-500/10 to-sky-500/10 rounded-3xl blur-2xl" aria-hidden />
+            <div className="rounded-3xl border border-zinc-800 p-6 bg-zinc-900/40">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <div className="text-sm font-medium">Scan for full portfolio</div>
                   <div className="text-xs opacity-70">Add this QR to your PDF CV</div>
                 </div>
                 {/* Placeholder QR (swap src with a generated QR from your prod URL) */}
-                <div className="p-2 rounded-xl border bg-white dark:bg-zinc-900">
+                <div className="p-2 rounded-xl border bg-zinc-900">
                   <img src="/logos/qr-placeholder.svg" alt="QR code" className="w-28 h-28" loading="lazy" />
                 </div>
               </div>
@@ -480,17 +595,39 @@ export default function PortfolioFusion() {
 
       {/* PROJECTS */}
       <Section id="projects" title="Selected Projects" icon={<Zap className="w-5 h-5" />}> 
-        <div className="grid gap-5">
-          {PROJECTS.map((p) => (
-            <ProjectCard p={p} key={p.name} />
+        <motion.div 
+          className="grid gap-5"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.2
+              }
+            }
+          }}
+        >
+          {PROJECTS.map((p, index) => (
+            <motion.div
+              key={p.name}
+              variants={{
+                hidden: { opacity: 0, y: 20, scale: 0.95 },
+                visible: { opacity: 1, y: 0, scale: 1 }
+              }}
+              transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+            >
+              <ProjectCard p={p} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </Section>
 
       {/* PERSONAL INTERESTS */}
       <Section id="interests" title="Personal Interests" icon={<Zap className="w-5 h-5" />}>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="rounded-2xl border p-6 bg-white/70 dark:bg-zinc-900/40">
+          <div className="rounded-2xl border p-6 bg-zinc-900/40">
             <h3 className="font-medium mb-3">Hobbies & Activities</h3>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -507,7 +644,7 @@ export default function PortfolioFusion() {
               </div>
             </div>
           </div>
-          <div className="rounded-2xl border p-6 bg-white/70 dark:bg-zinc-900/40">
+          <div className="rounded-2xl border p-6 bg-zinc-900/40">
             <h3 className="font-medium mb-3">Learning & Growth</h3>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -554,32 +691,32 @@ export default function PortfolioFusion() {
       {/* CONTACT */}
       <Section id="contact" title="Contact" icon={<Mail className="w-5 h-5" />}> 
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="rounded-2xl border p-6 bg-white/70 dark:bg-zinc-900/40">
+          <div className="rounded-2xl border p-6 bg-zinc-900/40">
             <h3 className="font-medium mb-2">Let’s build something</h3>
             <p className="text-sm opacity-80 mb-4">
               Prefer email? I usually reply within 24 hours.
             </p>
-            <a href={`mailto:${ME.email}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800">
+            <a href={`mailto:${ME.email}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-800">
               <Mail className="w-4 h-4" /> {ME.email}
             </a>
           </div>
           <form
-            className="rounded-2xl border p-6 bg-white/70 dark:bg-zinc-900/40 grid gap-3"
+            className="rounded-2xl border p-6 bg-zinc-900/40 grid gap-3"
             onSubmit={(e) => {
               e.preventDefault();
               alert("Thanks! Swap this for your form handler (e.g., Vercel Forms, Formspree, or API route).");
             }}
           >
             <label className="text-sm">Name
-              <input required className="mt-1 w-full px-3 py-2 rounded-xl border bg-white/70 dark:bg-zinc-950" placeholder="Your name" />
+              <input required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" placeholder="Your name" />
             </label>
             <label className="text-sm">Email
-              <input type="email" required className="mt-1 w-full px-3 py-2 rounded-xl border bg-white/70 dark:bg-zinc-950" placeholder="you@example.com" />
+              <input type="email" required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" placeholder="you@example.com" />
             </label>
             <label className="text-sm">Message
-              <textarea required className="mt-1 w-full px-3 py-2 rounded-xl border bg-white/70 dark:bg-zinc-950" rows={4} placeholder="Tell me about your project…" />
+              <textarea required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" rows={4} placeholder="Tell me about your project…" />
             </label>
-            <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                          <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-800">
               Send <ArrowUpRight className="w-4 h-4" />
             </button>
           </form>
@@ -587,7 +724,7 @@ export default function PortfolioFusion() {
       </Section>
 
       {/* FOOTER */}
-      <footer className="border-t border-zinc-200/60 dark:border-zinc-800/60 py-10">
+      <footer className="border-t border-zinc-800/60 py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="opacity-70">© {new Date().getFullYear()} {ME.name}. Built with Next.js + Tailwind.</div>
           <div className="flex items-center gap-3">
@@ -627,7 +764,7 @@ const SkillBlock: React.FC<{ title: string; items: string[]; icon?: React.ReactN
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5 bg-white/70 dark:bg-zinc-900/40">
+            <div className="rounded-2xl border border-zinc-800 p-5 bg-zinc-900/40">
       <div className="flex items-center gap-2 mb-3">
         {icon}
         <h3 className="font-medium">{title}</h3>
@@ -642,12 +779,12 @@ const SkillBlock: React.FC<{ title: string; items: string[]; icon?: React.ReactN
               href={techLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white/50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="flex items-center gap-2 p-2 rounded-lg border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700 transition-colors cursor-pointer"
             >
               {logoPath ? (
                 <img src={logoPath} alt={`${item} logo`} className="w-5 h-5" />
               ) : (
-                <div className="w-5 h-5 rounded bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
+                <div className="w-5 h-5 rounded bg-zinc-700 flex items-center justify-center">
                   <span className="text-xs font-mono text-zinc-500">{item.charAt(0)}</span>
                 </div>
               )}
@@ -661,7 +798,7 @@ const SkillBlock: React.FC<{ title: string; items: string[]; icon?: React.ReactN
 };
 
 const Principle: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <li className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-5 bg-white/70 dark:bg-zinc-900/40">
+          <li className="rounded-2xl border border-zinc-800 p-5 bg-zinc-900/40">
     <div className="font-medium mb-2">{title}</div>
     <p className="text-sm opacity-80">{children}</p>
   </li>
