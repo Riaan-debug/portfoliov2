@@ -10,13 +10,10 @@ import {
   Linkedin,
   Mail,
   Zap,
-  Gauge,
   Star,
   ExternalLink,
-  Smartphone,
   Server,
   Database,
-  ShieldCheck,
   Sparkles,
   Layers,
   Cpu,
@@ -592,36 +589,7 @@ export default function PortfolioFusion() {
               ))}
             </motion.div>
           </div>
-          {/* QR / Preview */}
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 bg-gradient-to-tr from-fuchsia-500/10 to-sky-500/10 rounded-3xl blur-2xl" aria-hidden />
-            <div className="rounded-3xl border border-zinc-800 p-6 bg-zinc-900/40">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm font-medium">Scan for full portfolio</div>
-                  <div className="text-xs opacity-70">Add this QR to your PDF CV</div>
-                </div>
-                {/* Placeholder QR (swap src with a generated QR from your prod URL) */}
-                <div className="p-2 rounded-xl border bg-zinc-900">
-                  <img src="/logos/qr-placeholder.svg" alt="QR code" className="w-28 h-28" loading="lazy" />
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-xl border p-3">
-                  <Smartphone className="w-4 h-4 mx-auto mb-1" />
-                  <div className="text-xs">Responsive</div>
-                </div>
-                <div className="rounded-xl border p-3">
-                  <Gauge className="w-4 h-4 mx-auto mb-1" />
-                  <div className="text-xs">Fast LCP</div>
-                </div>
-                <div className="rounded-xl border p-3">
-                  <ShieldCheck className="w-4 h-4 mx-auto mb-1" />
-                  <div className="text-xs">A11y‑first</div>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </motion.section>
 
