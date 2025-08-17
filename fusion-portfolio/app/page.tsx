@@ -53,7 +53,7 @@ const ME = {
   metrics: [
     { label: "Projects built", value: "5+" },
     { label: "Learning commitment", value: "100%" },
-    { label: "Career transition", value: "In progress" },
+    { label: "Career transition", value: "Now" },
   ],
   stacks: {
     frontend: ["React", "Next.js", "TypeScript", "TailwindCSS"],
