@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
 
 // Security configuration
 const SECURITY_CONFIG = {
@@ -6,7 +9,7 @@ const SECURITY_CONFIG = {
   maxMessageLength: 2000,
   maxNameLength: 100,
   maxEmailLength: 254,
-  allowedOrigins: ['http://localhost:3000', 'http://localhost:3001', 'https://riaanvanrhyn.dev'],
+  allowedOrigins: ['http://localhost:3000', 'http://localhost:3001', 'https://riaanvanrhyn.dev', 'https://portfoliov2-kappa-ecru.vercel.app'],
   rateLimit: {
     maxRequests: 5,
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -131,7 +134,7 @@ function getSecurityHeaders(): Record<string, string> {
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://discord.com;"
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self';"
   };
 }
 
@@ -304,71 +307,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send notification to Discord (using environment variable)
-    const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL || 
-      'https://discord.com/api/webhooks/1406596670187372695/qRad42Y2Z6I5KZ96sPfn3j7CL-MNAWK7TY7Ccj7rGTfu3jWrE6';
-    
-    const discordPayload = {
-      embeds: [{
-        title: '🎉 New Portfolio Contact!',
-        color: 0x00ff00,
-        fields: [
-          {
-            name: '👤 Name',
-            value: sanitizedName,
-            inline: true
-          },
-          {
-            name: '📧 Email',
-            value: sanitizedEmail,
-            inline: true
-          },
-          {
-            name: '💬 Message',
-            value: sanitizedMessage.length > 1024 ? sanitizedMessage.substring(0, 1021) + '...' : sanitizedMessage,
-            inline: false
-          },
-          {
-            name: '🌐 IP Address',
-            value: ip,
-            inline: true
-          },
-          {
-            name: '🕒 Timestamp',
-            value: new Date().toLocaleString('en-US', { 
-              timeZone: 'Africa/Johannesburg',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            inline: true
-          }
-        ],
-        footer: {
-          text: 'Portfolio Contact Form'
-        },
-        timestamp: new Date().toISOString()
-      }]
+    // Send email notification via Gmail
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: process.env.GMAIL_USER, // Send to yourself
+      subject: '🎉 New Portfolio Contact Form Submission',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+            New Portfolio Contact!
+          </h2>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>👤 Name:</strong> ${sanitizedName}</p>
+            <p><strong>📧 Email:</strong> ${sanitizedEmail}</p>
+            <p><strong>💬 Message:</strong></p>
+            <div style="background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #007bff;">
+              ${sanitizedMessage.replace(/\n/g, '<br>')}
+            </div>
+            <p style="margin-top: 15px; font-size: 12px; color: #666;">
+              <strong>🌐 IP Address:</strong> ${ip}<br>
+              <strong>🕒 Timestamp:</strong> ${new Date().toLocaleString('en-US', { 
+                timeZone: 'Africa/Johannesburg',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+          <p style="color: #666; font-size: 12px;">
+            This message was sent from your portfolio contact form at ${new Date().toLocaleDateString()}
+          </p>
+        </div>
+      `,
     };
 
     try {
-      const discordResponse = await fetch(discordWebhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(discordPayload),
+      await transporter.sendMail(mailOptions);
+      console.log('Email notification sent successfully');
+    } catch (emailError) {
+      console.warn('Failed to send email notification:', emailError);
+      console.error('Email error details:', {
+        name: emailError instanceof Error ? emailError.name : 'Unknown',
+        message: emailError instanceof Error ? emailError.message : String(emailError),
+        stack: emailError instanceof Error ? emailError.stack : 'No stack trace'
       });
+    }
 
-      if (!discordResponse.ok) {
-        console.warn('Discord notification failed:', await discordResponse.text());
-      } else {
-        console.log('Discord notification sent successfully');
+    // Store submission in database (JSON file)
+    const submission = {
+      id: Date.now().toString(),
+      name: sanitizedName,
+      email: sanitizedEmail,
+      message: sanitizedMessage,
+      timestamp: new Date().toISOString(),
+      ip,
+      userAgent: request.headers.get('user-agent') || 'unknown'
+    };
+
+    try {
+      const dbPath = path.join(process.cwd(), 'data', 'submissions.json');
+      const dbDir = path.dirname(dbPath);
+      
+      // Create data directory if it doesn't exist
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
       }
-    } catch (discordError) {
-      console.warn('Failed to send Discord notification:', discordError);
+      
+      // Read existing submissions or create new array
+      let submissions = [];
+      if (fs.existsSync(dbPath)) {
+        const fileContent = fs.readFileSync(dbPath, 'utf-8');
+        submissions = JSON.parse(fileContent);
+      }
+      
+      // Add new submission
+      submissions.push(submission);
+      
+      // Write back to file
+      fs.writeFileSync(dbPath, JSON.stringify(submissions, null, 2));
+      console.log('Submission stored in database successfully');
+    } catch (dbError) {
+      console.warn('Failed to store submission in database:', dbError);
     }
 
     // Log to console (sanitized data only)
