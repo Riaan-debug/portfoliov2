@@ -39,6 +39,54 @@ import {
  * 5) Hook up the "Download PDF CV" to your static PDF (public/Riaan_van_Rhyn_CV.pdf).
  */
 
+// ====== HELPER FUNCTIONS ===================================================
+const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         window.innerWidth <= 768 ||
+         'ontouchstart' in window ||
+         navigator.maxTouchPoints > 0;
+};
+
+const handlePDFDownload = (pdfPath: string, fileName: string) => {
+  console.log('PDF download requested:', { pdfPath, fileName, isMobile: isMobileDevice() });
+  
+  if (isMobileDevice()) {
+    console.log('Mobile device detected, attempting PDF download');
+    
+    // Try to fetch the PDF and create a blob URL for better mobile compatibility
+    fetch(pdfPath)
+      .then(response => {
+        console.log('PDF fetch response:', response.status, response.statusText);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        console.log('PDF blob created, size:', blob.size);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        console.log('PDF download initiated via blob');
+      })
+      .catch(error => {
+        console.error('Error downloading PDF:', error);
+        // Fallback to opening in new tab
+        console.log('Falling back to opening PDF in new tab');
+        window.open(pdfPath, '_blank');
+      });
+  } else {
+    console.log('Desktop device, using download attribute');
+    // For desktop, let the download attribute handle it
+  }
+};
+
 // ====== DATA (edit me) ======================================================
 const ME = {
   name: "Riaan van Rhyn",
@@ -500,10 +548,23 @@ export default function PortfolioFusion() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <a href={ME.pdf} className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border hover:bg-zinc-800 text-sm" download>
-              <Download className="w-4 h-4" /> <span>Download PDF</span>
+            <a 
+              href={ME.pdf} 
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border hover:bg-zinc-800 text-sm transition-colors" 
+              download="Riaan_van_Rhyn_CV.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (isMobileDevice()) {
+                  e.preventDefault();
+                  handlePDFDownload(ME.pdf, 'Riaan_van_Rhyn_CV.pdf');
+                }
+              }}
+            >
+              <Download className="w-4 h-4" /> 
+              <span className="hidden sm:inline">Download PDF</span>
+              <span className="sm:hidden">CV</span>
             </a>
-
           </div>
         </div>
       </header>
@@ -533,13 +594,21 @@ export default function PortfolioFusion() {
               {[
                 { href: ME.github, icon: <Github className="w-4 h-4" />, label: "GitHub" },
                 { href: ME.linkedin, icon: <Linkedin className="w-4 h-4" />, label: "LinkedIn" },
-                { href: `mailto:${ME.email}`, icon: <Mail className="w-4 h-4" />, label: "Email me" }
+                { href: `mailto:${ME.email}`, icon: <Mail className="w-4 h-4" />, label: "Email me" },
+                { href: ME.pdf, icon: <Download className="w-4 h-4" />, label: "Download CV", isDownload: true, isMobile: true }
               ].map((button, index) => (
                 <motion.a
                   key={button.label}
                   href={button.href}
                   target={button.label !== "Email me" ? "_blank" : undefined}
                   rel={button.label !== "Email me" ? "noreferrer" : undefined}
+                  download={button.isDownload ? "Riaan_van_Rhyn_CV.pdf" : undefined}
+                  onClick={button.isMobile ? (e) => {
+                    if (isMobileDevice()) {
+                      e.preventDefault();
+                      handlePDFDownload(button.href, 'Riaan_van_Rhyn_CV.pdf');
+                    }
+                  } : undefined}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-800 cursor-pointer"
                   whileHover={{ 
                     scale: 1.05,
