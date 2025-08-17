@@ -85,7 +85,7 @@ const PROJECTS: Array<{
       "Clean, semantic HTML structure",
     ],
     tech: ["HTML", "CSS", "JavaScript"],
-    href: "",
+    href: "https://github.com/Riaan-debug/First-Portfolio",
     repo: "https://github.com/Riaan-debug/First-Portfolio",
     image: "/images/riaan-van-rhyn-portfolio-screenshot.png",
   },
@@ -114,7 +114,7 @@ const PROJECTS: Array<{
       "Modern dark theme UI with responsive design",
     ],
     tech: ["TypeScript", "CSS", "JavaScript", "HTML"],
-    href: "",
+    href: "https://github.com/Riaan-debug/vibez-capstone",
     repo: "https://github.com/Riaan-debug/vibez-capstone",
     image: "/images/vibez-app-screenshot.png",
   },
@@ -124,6 +124,24 @@ const PROJECTS: Array<{
 // ====== UTILITIES ===========================================================
 function classNames(...xs: Array<string | false | undefined>) {
   return xs.filter(Boolean).join(" ");
+}
+
+// Security: Validate and sanitize URLs
+function validateUrl(url: string): string | null {
+  try {
+    // Only allow HTTPS URLs and relative paths
+    if (url.startsWith('https://') || url.startsWith('/') || url.startsWith('#')) {
+      return url;
+    }
+    // Block potentially dangerous protocols
+    if (url.startsWith('javascript:') || url.startsWith('data:') || url.startsWith('vbscript:')) {
+      console.warn('Blocked potentially dangerous URL:', url);
+      return null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 // Map technology names to logo files
@@ -937,7 +955,9 @@ const SkillBlock: React.FC<{ title: string; items: string[]; icon?: React.ReactN
       'Cursor': 'https://www.cursor.com/',
       'HyperionDev': 'https://www.hyperiondev.com/',
     };
-    return linkMap[tech] || '#';
+    const link = linkMap[tech] || '#';
+    // Security: Validate the URL before returning
+    return validateUrl(link) || '#';
   };
 
   return (
@@ -957,6 +977,13 @@ const SkillBlock: React.FC<{ title: string; items: string[]; icon?: React.ReactN
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 p-2 rounded-lg border border-zinc-700 bg-zinc-800/50 hover:bg-zinc-700 transition-colors cursor-pointer"
+              onClick={(e) => {
+                // Security: Additional validation on click
+                if (!validateUrl(techLink)) {
+                  e.preventDefault();
+                  console.warn('Blocked potentially dangerous link click:', techLink);
+                }
+              }}
             >
               {logoPath ? (
                 <img src={logoPath} alt={`${item} logo`} className="w-5 h-5" />
