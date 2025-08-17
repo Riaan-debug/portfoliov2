@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://riaanvanrhyn.dev/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+

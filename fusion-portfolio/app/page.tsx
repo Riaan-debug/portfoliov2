@@ -47,7 +47,7 @@ const ME = {
   name: "Riaan van Rhyn",
   title: "Full‑Stack Web Developer",
   location: "Gauteng, South Africa",
-  email: "riaan.vanrhyn@example.com",
+  email: "vanrhynriaan85@gmail.com",
   github: "https://github.com/Riaan-debug",
   linkedin: "https://www.linkedin.com/in/riaan-van-rhyn/",
   pdf: "/Riaan_van_Rhyn_CV.pdf", // put your CV into /public and keep this path
@@ -60,9 +60,9 @@ const ME = {
   ],
   stacks: {
     frontend: ["React", "Next.js", "TypeScript", "TailwindCSS"],
-    backend: ["Node.js", "Express", "JavaScript"],
-    data: ["MongoDB", "SQLite"],
-    tooling: ["Git", "VS Code", "Cursor", "HyperionDev"],
+    backend: ["Node.js", "Express", "JavaScript", "Laravel", "PHP"],
+    data: ["MongoDB", "SQLite", "MySQL"],
+    tooling: ["Git", "VS Code", "Cursor", "HyperionDev", "Laravel Herd"],
   },
 };
 
@@ -118,6 +118,7 @@ const PROJECTS: Array<{
     repo: "https://github.com/Riaan-debug/vibez-capstone",
     image: "/images/vibez-app-screenshot.png",
   },
+
 ];
 
 // ====== UTILITIES ===========================================================
@@ -135,8 +136,11 @@ function getLogoPath(tech: string): string | null {
     'Node.js': '/logos/nodejs.svg',
     'Express': '/logos/express.svg',
     'JavaScript': '/logos/javascript.svg',
+    'Laravel': '/logos/laravel.svg',
+    'PHP': '/logos/php.svg',
     'MongoDB': '/logos/mongodb.svg',
     'SQLite': '/logos/sqlite.svg',
+    'MySQL': '/logos/mysql.svg',
     'Git': '/logos/git.svg',
   };
   
@@ -244,9 +248,27 @@ const ProjectCard: React.FC<{ p: (typeof PROJECTS)[number] }>
   >
     <div className="md:col-span-2 rounded-xl overflow-hidden border border-zinc-700/60 bg-zinc-800 aspect-video">
       {p.image ? (
-        <img loading="lazy" src={p.image} alt={p.name} className="w-full h-full object-cover" />
+        <img 
+          loading="lazy" 
+          src={p.image} 
+          alt={`${p.name} project screenshot`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
       ) : (
         <div className="w-full h-full grid place-items-center text-zinc-400">no image</div>
+      )}
+      {p.image && (
+        <div className="hidden w-full h-full grid place-items-center text-zinc-400 bg-zinc-800">
+          <div className="text-center">
+            <div className="text-2xl mb-2">📱</div>
+            <div className="text-xs">Project Preview</div>
+          </div>
+        </div>
       )}
     </div>
     <div className="md:col-span-3 flex flex-col gap-3">
@@ -283,6 +305,13 @@ const ProjectCard: React.FC<{ p: (typeof PROJECTS)[number] }>
 // ====== MAIN COMPONENT ======================================================
 export default function PortfolioFusion() {
   const [mounted, setMounted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [pageViews, setPageViews] = useState(0);
 
   // Move useMemo before any conditional returns to follow Rules of Hooks
   const heroVariants = useMemo(
@@ -297,6 +326,88 @@ export default function PortfolioFusion() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Analytics and performance monitoring
+  useEffect(() => {
+    if (!mounted) return;
+    
+    // Increment page view counter
+    const currentViews = parseInt(localStorage.getItem('portfolio-views') || '0') + 1;
+    localStorage.setItem('portfolio-views', currentViews.toString());
+    setPageViews(currentViews);
+    
+    // Performance monitoring
+    if ('performance' in window) {
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.entryType === 'navigation') {
+            const navEntry = entry as PerformanceNavigationTiming;
+            console.log('Page Load Performance:', {
+              domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
+              loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
+              totalTime: navEntry.loadEventEnd - navEntry.fetchStart
+            });
+          }
+        }
+      });
+      
+      observer.observe({ entryTypes: ['navigation'] });
+      
+      return () => observer.disconnect();
+    }
+  }, [mounted]);
+
+  // Form handling
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormStatus('submitting');
+    
+    try {
+      // Basic validation
+      if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+        throw new Error('Please fill in all fields');
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        throw new Error('Please enter a valid email address');
+      }
+      
+      // Send to API endpoint
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message');
+      }
+      
+      setFormStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      
+      // Reset success status after 5 seconds
+      setTimeout(() => setFormStatus('idle'), 5000);
+      
+    } catch (error) {
+      setFormStatus('error');
+      console.error('Form submission error:', error);
+      
+      // Reset error status after 5 seconds
+      setTimeout(() => setFormStatus('idle'), 5000);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   // Don't render until mounted
   if (!mounted) {
@@ -537,6 +648,15 @@ export default function PortfolioFusion() {
                 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer">
                   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
                 </a>
+                <a href="https://laravel.com/" target="_blank" rel="noopener noreferrer">
+                  <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel" />
+                </a>
+                <a href="https://herd.laravel.com/" target="_blank" rel="noopener noreferrer">
+                  <img src="https://img.shields.io/badge/Laravel_Herd-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel Herd" />
+                </a>
+                <a href="https://www.php.net/" target="_blank" rel="noopener noreferrer">
+                  <img src="https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP" />
+                </a>
               </div>
             </div>
 
@@ -552,6 +672,9 @@ export default function PortfolioFusion() {
                 </a>
                 <a href="https://www.sqlite.org/" target="_blank" rel="noopener noreferrer">
                   <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+                </a>
+                <a href="https://www.mysql.com/" target="_blank" rel="noopener noreferrer">
+                  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
                 </a>
               </div>
             </div>
@@ -702,23 +825,74 @@ export default function PortfolioFusion() {
           </div>
           <form
             className="rounded-2xl border p-6 bg-zinc-900/40 grid gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Thanks! Swap this for your form handler (e.g., Vercel Forms, Formspree, or API route).");
-            }}
+            onSubmit={handleFormSubmit}
           >
-            <label className="text-sm">Name
-              <input required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" placeholder="Your name" />
-            </label>
-            <label className="text-sm">Email
-              <input type="email" required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" placeholder="you@example.com" />
-            </label>
-            <label className="text-sm">Message
-              <textarea required className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950" rows={4} placeholder="Tell me about your project…" />
-            </label>
-                          <button type="submit" className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border hover:bg-zinc-800">
-              Send <ArrowUpRight className="w-4 h-4" />
-            </button>
+                          <label className="text-sm">Name
+                <input 
+                  required 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent" 
+                  placeholder="Your name" 
+                />
+              </label>
+              <label className="text-sm">Email
+                <input 
+                  type="email" 
+                  required 
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent" 
+                  placeholder="you@example.com" 
+                />
+              </label>
+              <label className="text-sm">Message
+                <textarea 
+                  required 
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full px-3 py-2 rounded-xl border bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-600 focus:border-transparent" 
+                  rows={4} 
+                  placeholder="Tell me about your project…" 
+                />
+              </label>
+              
+              {/* Form Status Messages */}
+              {formStatus === 'success' && (
+                <div className="p-3 rounded-lg bg-green-900/20 border border-green-700/30 text-green-300 text-sm">
+                  ✅ Message sent successfully! I'll get back to you soon.
+                </div>
+              )}
+              
+              {formStatus === 'error' && (
+                <div className="p-3 rounded-lg bg-red-900/20 border border-red-700/30 text-red-300 text-sm">
+                  ❌ Something went wrong. Please try again or email me directly.
+                </div>
+              )}
+              
+              <button 
+                type="submit" 
+                disabled={formStatus === 'submitting'}
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 ${
+                  formStatus === 'submitting' 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-zinc-800 hover:scale-105'
+                }`}
+              >
+                {formStatus === 'submitting' ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    Send <ArrowUpRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
           </form>
         </div>
       </Section>
@@ -727,6 +901,9 @@ export default function PortfolioFusion() {
       <footer className="border-t border-zinc-800/60 py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="opacity-70">© {new Date().getFullYear()} {ME.name}. Built with Next.js + Tailwind.</div>
+          <div className="text-xs opacity-50">
+            {pageViews > 0 && `Viewed ${pageViews} time${pageViews === 1 ? '' : 's'}`}
+          </div>
           <div className="flex items-center gap-3">
             <a href={ME.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
               <Github className="w-4 h-4" /> GitHub
