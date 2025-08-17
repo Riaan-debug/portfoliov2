@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
           // Content Security Policy
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://discord.com; frame-ancestors 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
           },
           // Additional security
           {
@@ -69,18 +69,14 @@ const nextConfig: NextConfig = {
   poweredByHeader: false, // Remove X-Powered-By header
   compress: true, // Enable compression
   reactStrictMode: true, // Enable React Strict Mode
-  swcMinify: true, // Use SWC for minification
 
   // Environment variables validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 
-  // Experimental features (security-focused)
-  experimental: {
-    // Enable security-focused features
-    serverComponentsExternalPackages: [],
-  },
+  // Server external packages (security-focused)
+  serverExternalPackages: [],
 
   // Image optimization security
   images: {

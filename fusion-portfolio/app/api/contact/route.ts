@@ -307,6 +307,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Debug: Check environment variables
+    console.log('Gmail Environment Variables:', {
+      user: process.env.GMAIL_USER ? 'Set' : 'Not set',
+      pass: process.env.GMAIL_APP_PASSWORD ? 'Set' : 'Not set',
+      userValue: process.env.GMAIL_USER,
+      passValue: process.env.GMAIL_APP_PASSWORD ? '***' : 'Not set'
+    });
+
     // Send email notification via Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
