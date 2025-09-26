@@ -94,7 +94,7 @@ const ME = {
   location: "Gauteng, South Africa",
   email: "vanrhynriaan85@gmail.com",
   github: "https://github.com/Riaan-debug",
-  linkedin: "https://www.linkedin.com/in/riaan-van-rhyn/",
+  linkedin: "https://www.linkedin.com/in/riaan-van-rhyn",
   pdf: "/Riaan_van_Rhyn_CV.pdf", // put your CV into /public and keep this path
   blurb:
     "I'm a teacher transitioning to web development, passionate about building accessible web apps. I completed a full-stack web development course with HyperionDev and I'm eager to bring my problem-solving skills and dedication to a development team.",
