@@ -161,6 +161,22 @@ const PROJECTS: Array<{
     repo: "https://github.com/Riaan-debug/vibez-capstone",
     image: "/images/vibez-app-screenshot.png",
   },
+  {
+    name: "Interactive Analytics Dashboard",
+    description:
+      "Professional analytics dashboard showcasing advanced React patterns, data visualization, and modern UI/UX. Built for portfolio demonstration with enterprise-grade features and clean code architecture.",
+    outcomes: [
+      "Advanced React patterns and component architecture",
+      "Comprehensive data visualization and analytics",
+      "Enterprise-grade security measures and middleware",
+      "Dark/light mode toggle with professional UI design",
+      "Export functionality (Excel, CSV, JSON formats)",
+    ],
+    tech: ["React", "JavaScript", "CSS", "Vite", "Tailwind CSS"],
+    href: "https://interactive-dashboard-mu.vercel.app/",
+    repo: "https://github.com/Riaan-debug/interactive-dashboard",
+    image: "/images/interactive-dashboard-screenshot.png",
+  },
 
 ];
 
